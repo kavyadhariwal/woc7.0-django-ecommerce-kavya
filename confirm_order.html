@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container d-flex justify-content-center">
+    <div class="border border-warning p-4 rounded shadow-lg text-center bg-dark text-warning mt-5" style="max-width: 500px; width: 100%;">
+        <form id="confirm-order-form" method="POST">
+            {% csrf_token %}
+
+            <h3>Order Summary</h3>
+            <ul class="list-unstyled">
+                {% for item in order_items %}
+                    <li>{{ item.product_name }} - {{ item.quantity }} x ₹{{ item.price }}</li>
+                {% endfor %}
+            </ul>
+            <p><strong>Total Price:</strong> ₹{{ total_price }}</p>
+
+            <h3>Payment</h3>
+            <label>Name:</label>
+            <input type="text" name="user_name" class="form-control mb-2" required>
+            <label>Email:</label>
+            <input type="email" name="user_email" class="form-control mb-3" required>
+
+            <button type="button" class="btn btn-primary w-100" id="payment-btn">Payment</button>
+        </form>
+    </div>
+</div>
+
+
+<div class="text-center mt-3">
+    <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#ratingModal">Rating</button>
+</div>
+
+<div class="modal fade" id="ratingModal" tabindex="-1" aria-labelledby="ratingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Rate Your Purchased Products</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="rating-form">
+                    {% csrf_token %}
+                    <ul>
+                        {% for item in order_items %}
+                            <li>
+                                <strong>{{ item.product_name }}</strong>
+                                <input type="number" name="rating_{{ item.product.id }}" min="1" max="5" required>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <button type="submit" class="btn btn-dark">Submit Ratings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let ratingForm = document.getElementById("rating-form");
+
+    if (ratingForm) {
+        ratingForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+
+            fetch("{% url 'submit_ratings' %}", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Rating submitted successfully!");
+
+                    
+                    let productId = Object.keys(formData.entries().next().value)[0].split("_")[1];  
+                    let updatedRating = data.new_average_rating;
+
+                    let starsContainer = document.querySelector(`#stars-${productId}`);
+                    if (starsContainer) {
+                        starsContainer.innerHTML = "";
+                        for (let i = 1; i <= 5; i++) {
+                            let star = document.createElement("span");
+                            star.classList.add(i <= updatedRating ? "text-warning" : "text-warning");
+                            star.innerHTML = "★";
+                            starsContainer.appendChild(star);
+                        }
+                    }
+
+                    
+                    document.querySelectorAll('input[type="number"]').forEach(input => {
+                        input.setAttribute("disabled", true);
+                    });
+
+                } else {
+                    alert("Something went wrong!");
+                }
+            })
+            .catch(error => {
+                alert("An error occurred.");
+            });
+        });
+    }
+});
+
+
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        
+        setTimeout(() => { 
+            let paymentButton = document.getElementById("payment-btn");
+    
+            if (paymentButton) {
+               
+                paymentButton.addEventListener("click", function () {
+                    alert("Payment done ✅");
+                });
+            } else {
+                console.error(" Payment button NOT found in DOM!");
+            }
+        }, 500);  
+    });
+    </script>
+    
+    {% endblock %}

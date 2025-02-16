@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Order Placed Successfully!</h1>
+    <p>Thank you for your order, {{ user_name }}!</p>
+
+    <div id="ratingModal">
+        <h2>Rate Your Products</h2>
+        <div id="ratingModalContent">
+            {% for item in order_items %}
+                <div>
+                    <p>{{ item.name }}</p>
+                    <select class="rating" data-product-id="{{ item.id }}">
+                        <option value="1">1 ⭐</option>
+                        <option value="2">2 ⭐⭐</option>
+                        <option value="3">3 ⭐⭐⭐</option>
+                        <option value="4">4 ⭐⭐⭐⭐</option>
+                        <option value="5">5 ⭐⭐⭐⭐⭐</option>
+                    </select>
+                </div>
+            {% endfor %}
+        </div>
+        <button id="submitRatings">Submit Ratings</button>
+    </div>
+{% endblock %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("submitRatings").addEventListener("click", function() {
+        let ratings = [];
+        document.querySelectorAll(".rating").forEach(select => {
+            ratings.push({
+                product_id: select.getAttribute("data-product-id"),
+                rating: select.value
+            });
+        });
+
+        fetch("{% url 'rate_products' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ ratings: ratings })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Thank you for your feedback!");
+                window.location.href = "{% url 'home' %}";
+            } else {
+                alert("Error submitting ratings.");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+});
+</script>

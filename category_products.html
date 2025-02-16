@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block sidebar %}
+  <div class="col-md-3">
+    <ul class="list-group">
+      <li class="list-group-item bg-dark text-light">
+        <a href="{% url 'all_products' %}" class="text-decoration-none text-light">All Products</a>
+      </li>
+      {% for category in categories %}
+        <li class="list-group-item category-item">
+          <a href="{% url 'category_products' category.id %}" class="text-decoration-none text-light">
+            {{ category.name }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <h1>Products in {{ category.name }}</h1>
+  <div>
+    {% for product in products %}
+      <div>
+        <h2>{{ product.name }}</h2>
+        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        <p>{{ product.description }}</p>
+        <p>Price: {{ product.price }}</p>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}
