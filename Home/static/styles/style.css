@@ -1,0 +1,95 @@
+
+          body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: black;
+            margin: 0;
+            padding: 0;
+        }
+        
+        header {
+        font-weight: bold;
+        }
+        .content {
+          display: flex;
+          align-items: center; 
+          justify-content: center; 
+          font-size:24px;
+          margin-top: 20px;
+          
+      }
+      
+      .about-section {
+        padding: 40px;
+        text-align: center;
+    }
+ 
+        @media (max-width: 600px) {
+            header {
+                font-size: 24px;
+                padding: 1px;
+            }
+            
+            .content {
+                font-size: 20px;
+                padding: 15px;
+            }
+            
+        }
+      .center-text {
+        text-align: center;
+        margin-top: 20px; 
+        display: flex;
+        justify-content: center;
+    }
+    .footer {
+      font-weight: bold;
+      position: relative;
+      bottom: 0;
+      width: 100%;
+      padding: 8px 0;
+      font-size: 18px;
+      margin-top: 10px; 
+  }
+
+  .footer a {
+      margin: 0 10px;
+      font-size: 20px;
+      text-decoration: none;
+  }
+      
+.login-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+.jumbotron-slide {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+  }
+
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    background-color: rgba(0, 0, 0, 0.5); 
+    border-radius: 50%;
+  }
+
+  .btn-warning {
+    background-color: #f1ddc5 !important;
+    border-color: #f1ddc5 !important;
+    color: black !important;  
+}
+.text-warning {
+  color: #f1ddc5 !important;
+}

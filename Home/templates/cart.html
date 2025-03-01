@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br>
+<h2 class="text-warning text-center">Your Cart</h2>
+
+{% if cart_items %}
+<div class="flex-container">
+    <table class="table table-bordered table-dark ">
+        <thead>
+            <tr>
+                <th>Product Image</th>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+            <tr data-item-id="{{ item.id }}">
+                <td><img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" width="50"></td>
+                <td>{{ item.product.name }}</td>
+                <td>₹{{ item.product.price|floatformat:2 }}</td>
+                <td>
+                    <input type="number" class="quantity-input" data-item-id="{{ item.id }}" value="{{ item.quantity }}" min="0">
+                </td>
+                <td class="total-price" data-item-id="{{ item.id }}">₹{{ item.total_price|floatformat:2 }}</td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+    <h3 class="text-warning text-center">Total Price: ₹<span id="grand-total">{{ total_price|floatformat:2 }}</span></h3>
+    <button class="btn btn-primary d-block mx-auto" data-bs-toggle="modal" data-bs-target="#checkoutModal">Proceed to Checkout</button>
+
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="checkoutModalLabel">Checkout</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body ">
+                    <p><strong>Total Price:₹</strong> <span id="modal-total">{{ total_price|floatformat:2 }}</span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary confirm-order-btn">Confirm Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <p class="text-dark">Your cart is empty!</p>
+{% endif %}
+
+<script>
+    document.querySelectorAll(".quantity-input").forEach(input => {
+        input.addEventListener("change", function() {
+            let itemId = this.getAttribute("data-item-id");
+            let newQuantity = parseInt(this.value);
+    
+            fetch("/update-cart/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ item_id: itemId, quantity: newQuantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (newQuantity === 0) {
+                        document.querySelector(`tr[data-item-id='${itemId}']`).remove();
+                    } else {
+                        let itemTotal = parseFloat(data.item_total);
+                        document.querySelector(`.total-price[data-item-id='${itemId}']`).innerText = `${itemTotal ? itemTotal.toFixed(2) : "0.00"}`;
+                    }
+                    let grandTotal = parseFloat(data.grand_total);
+                    document.getElementById("grand-total").innerText = `${grandTotal ? grandTotal.toFixed(2) : "0.00"}`;
+                    document.getElementById("modal-total").innerText = `${grandTotal ? grandTotal.toFixed(2) : "0.00"}`;
+                } else {
+                    alert("Failed to update quantity: " + (data.error || "Unknown error."));
+                }
+            })
+            .catch(error => {
+                alert("Error updating cart: " + error);
+            });
+        });
+    });
+    
+
+    document.querySelector(".confirm-order-btn").addEventListener("click", function() {
+        fetch("/confirm-order/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: "user_name=John Doe&user_email=johndoe@example.com"
+        })
+        .then(response => response.text())  
+        .then(html => {
+            document.body.innerHTML = html; 
+        })
+        .catch(error => {
+            alert("An error occurred. Please try again.");
+        });
+    });
+    
+     
+    
+</script>
+{% endblock %}

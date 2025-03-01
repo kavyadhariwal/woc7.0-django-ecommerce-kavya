@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  
+  <div class="container">
+    <div class="row">
+     
+      <div class="col-md-3 ms-md-3 me-md-3 bg-dark text-light sidebar">
+        <ul class="list-group style">
+          <li class="list-group-item bg-dark text-light" style="margin-top: 20px;">
+            <a href="{% url 'all_products' %}" class="text-decoration-none text-light">All Products</a>
+          </li>
+          <hr>
+          {% for category in categories %}
+            <li class="list-group-item bg-dark text-light">
+              <a href="{% url 'category_products' category.id %}" class="text-light text-decoration-none">
+                {{ category.name }}
+              </a>
+            </li>
+            <hr>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="col-md-8">
+        <div class="row g-3"> 
+          {% for product in products %}
+            <div class="col-md-4 pt-3">
+              <div class="card h-100"> 
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="object-fit: cover; height: 200px;">
+                <div class="card-body text-center">
+                  <h5 class="card-title">{{ product.name }}</h5>
+                  <p class="card-text">{{ product.description }}</p>
+                  <p>Price: ₹{{ product.price }}</p>
+                
+                  <div id="stars-{{ product.id }}">
+                    {% for i in "12345" %}
+                        {% if forloop.counter|add:0 <= product.average_rating|floatformat:"0"|add:0 %}
+                            <span style="color:#ffc107">★</span>
+                        {% else %}
+                            <span class="text-secondary">★</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <form method="post" action="{% url 'add_to_cart' product.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary ms-4">Add to Cart</button>
+                  </form>
+                  <button class="btn btn-secondary border wishlist-btn" data-product-id="{{ product.id }}">
+                    <span class="wishlist-icon text-danger">
+                        {% if product in wishlist_items %} ❤️ {% else %} ♡ {% endif %}
+                    </span>
+                </button>
+              </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+{% endblock %}
